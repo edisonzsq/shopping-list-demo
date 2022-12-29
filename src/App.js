@@ -1,24 +1,48 @@
 import logo from './logo.svg';
 import './App.css';
+import Display from './components/Display';
+import Bill from "./components/Bill";
+import { useState, useReducer, useEffect } from "react";
+import {GSTContextComponent} from './contexts/GSTContext';
 
 function App() {
+
+  const [list, setList] = useState([]);
+
+  const [totalPrice, dispatch] = useReducer((state, action) => {
+    switch(action.type.toUpperCase()){
+      case "SUM": 
+      default:
+        let result = 0;
+        list.forEach(item => {
+          result += Number(item.price);
+        })
+        return result;
+    }
+  }, 0)
+
+  useEffect(()=>{
+    if(list.length === 0) return; // Don't do anything if list is empty
+
+    dispatch({type:"sum"});
+  }, [list])
+
+  const addNewItem = (newItem) => {
+    setList(prevState => {
+      return [
+        ...prevState,
+        newItem
+      ]
+    })
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <GSTContextComponent>
+        <Display currentList={list} handleAddNewItem={addNewItem}></Display>
+        <Bill totalPrice={totalPrice}></Bill>
+      </GSTContextComponent>
+    </>
   );
 }
 
